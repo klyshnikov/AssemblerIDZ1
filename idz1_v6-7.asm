@@ -1,11 +1,95 @@
 .data
 array: .space 40
 new_array: .space 40
+test_array_1: .space 40
 msg_1: .asciz "Enter array size (from 1 to 10): \n"
 msg_2: .asciz "The program ended incorrectly! Size is incorrect!\n"
 msg_3: .asciz "Fill all array separated by Enter: \n"
 msg_4: .asciz "\n"
 msg_5: .asciz "Answer: all elements without minimum\n"
+msg_6: .asciz "Result of test program"
+
+.text
+.macro testcase_1      # First test - array [-10, 100, 99, -10, 23]
+	li a7, 4
+	la a0, msg_6
+	ecall
+	la a0, msg_4
+	ecall
+
+	la t0, array
+	li t1, -10
+	sw t1, (t0)
+	addi t0, t0, 4
+	li t1, 100
+	sw t1, (t0)
+	addi t0, t0, 4
+	li t1, 99
+	sw t1, (t0)
+	addi t0, t0, 4
+	li t1, -10
+	sw t1, (t0)
+	addi t0, t0, 4
+	li t1, 23
+	sw t1, (t0)
+	addi t0, t0, 4
+	
+	addi sp, sp, -4
+	li a2, 5
+	sw a2, (sp)
+	jal find_min_in_array
+	mv a3, a0
+	
+	addi sp, sp, -4                 
+	sw a2, (sp)        
+	addi sp, sp, -4
+	sw a3, (sp)
+	jal create_array
+	
+	addi sp, sp, -4              
+	sw a0, (sp)
+	jal print_new_array
+	
+.end_macro
+
+.macro testcase_2              # Second array - [-1, 45, -1, -1]
+	li a7, 4
+	la a0, msg_6
+	ecall
+	la a0, msg_4
+	ecall
+
+	la t0, array
+	li t1, -1
+	sw t1, (t0)
+	addi t0, t0, 4
+	li t1, 45
+	sw t1, (t0)
+	addi t0, t0, 4
+	li t1, -1
+	sw t1, (t0)
+	addi t0, t0, 4
+	li t1, -1
+	sw t1, (t0)
+	addi t0, t0, 4
+	
+	addi sp, sp, -4
+	li a2, 4
+	sw a2, (sp)
+	jal find_min_in_array
+	mv a3, a0
+	
+	addi sp, sp, -4                 
+	sw a2, (sp)        
+	addi sp, sp, -4
+	sw a3, (sp)
+	jal create_array
+	
+	addi sp, sp, -4              
+	sw a0, (sp)
+	jal print_new_array
+	
+.end_macro
 
 .text
 
@@ -45,7 +129,8 @@ addi sp, sp, -4                 # Call program that print new array
 sw a0, (sp)
 jal print_new_array               # a0 - actual parameter (size of new array)
 
-
+testcase_1
+testcase_2
 
 j end_program
 
@@ -138,6 +223,7 @@ find_min_in_array:
 	lw t1, (t0)
 	lw t3, (sp)
 	
+	
 	min_loop:                      # In this loop we find min element
 	beqz t3, end_find_min_in_array
 	lw t2, (t0)
@@ -184,6 +270,9 @@ create_array:
 	lw t1, (sp)
 	addi sp, sp, -8
 	
+	addi sp, sp, -4
+	sw t0, (sp)
+	
 	la t2, array
 	la t3, new_array
 	li t5, 0
@@ -191,6 +280,7 @@ create_array:
 	create_array_loop:             # In this loop we set values in the new array
 	beqz t1, end_create_array_loop     # that don't equal minimum 
 	lw t4, (t2)
+	lw t0, (sp)
 	beq t4, t0, equals_el_and_min
 	
 	sw t4, (t3)
@@ -206,6 +296,7 @@ create_array:
 	
 	end_create_array_loop:          # End loop
 	
+	addi sp, sp, 4
 	mv a0, t5
 	lw ra (sp)                        # Return program
 	addi sp sp 4 
